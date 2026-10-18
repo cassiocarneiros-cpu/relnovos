@@ -5,13 +5,17 @@ const mes = String(dataAtual.getMonth() + 1).padStart(2, '0');
 const ano = dataAtual.getFullYear();
 const dataFormatada = `${dia}/${mes}/${ano}`;
 
-// ========= 14 MÓDULOS =========
+// ========= 16 MÓDULOS (14 originais + 2 checklists) =========
 const modulos = [
     { id: 'mod1', nome: 'COORDENADOR DE SERVIÇO', icone: 'fa-user-tie' },
     { id: 'mod2', nome: 'EVENTO', icone: 'fa-clipboard-list' },
     { id: 'mod3', nome: 'PRODUTIVIDADE', icone: 'fa-chart-line' },
     { id: 'mod4', nome: 'ESCOLTA DE EMERGÊNCIA', icone: 'fa-ambulance' },
     { id: 'mod5', nome: 'OCORRÊNCIA', icone: 'fa-exclamation-triangle' },
+    // --- NOVOS MÓDULOS DE CHECKLIST ---
+    { id: 'checklist4', nome: 'CHECKLIST 4 RODAS', icone: 'fa-car' },
+    { id: 'checklist2', nome: 'CHECKLIST 2 RODAS', icone: 'fa-motorcycle' },
+    // ----------------------------------
     { id: 'mod6', nome: '1º PELOTÃO (GUARDA/MEIOS)', icone: 'fa-shield-alt' },
     { id: 'mod7', nome: '1º PELOTÃO (VIATURA)', icone: 'fa-truck' },
     { id: 'mod13', nome: '1º PELOTÃO (MOTOS)', icone: 'fa-motorcycle' },
@@ -25,23 +29,37 @@ const modulos = [
 
 // Renderizar grid
 const grid = document.getElementById('moduleGrid');
-modulos.forEach(mod => {
-    const card = document.createElement('div');
-    card.className = 'module-card';
-    card.innerHTML = `
-        <i class="fas ${mod.icone}"></i>
-        <div class="info"><h3>${mod.nome}</h3><p>Clique para preencher</p></div>
-        <i class="fas fa-chevron-right arrow"></i>
-    `;
-    card.onclick = () => abrirModulo(mod.id);
-    grid.appendChild(card);
-});
+if (grid) {
+    modulos.forEach(mod => {
+        const card = document.createElement('div');
+        card.className = 'module-card';
+        card.innerHTML = `
+            <i class="fas ${mod.icone}"></i>
+            <div class="info"><h3>${mod.nome}</h3><p>Clique para preencher</p></div>
+            <i class="fas fa-chevron-right arrow"></i>
+        `;
+        card.onclick = () => abrirModulo(mod.id);
+        grid.appendChild(card);
+    });
+}
 
 // ========= ABRIR MÓDULO =========
 function abrirModulo(modId) {
+    // --- ABRE OS CHECKLISTS EM NOVA ABA ---
+    if (modId === 'checklist4') {
+        window.open('./checklist-index.html', '_blank');
+        return;
+    }
+    if (modId === 'checklist2') {
+        window.open('./checklist-index.html', '_blank');
+        return;
+    }
+    // --------------------------------------
+
     document.getElementById('telaInicial').classList.add('hidden');
     document.getElementById('telaFormulario').classList.remove('hidden');
     const container = document.getElementById('formularioContainer');
+    if (!container) return;
     container.innerHTML = '';
 
     const modulo = modulos.find(m => m.id === modId);
@@ -96,7 +114,6 @@ function campoNumero(label, id) {
     return campo(label, id, 'number', '0', ''); 
 }
 
-// Lista simples de nomes
 function criarListaNome(label, listId, inputId) {
     const wrapper = document.createElement('div');
     wrapper.style.marginBottom = '14px';
@@ -130,7 +147,6 @@ function criarListaNome(label, listId, inputId) {
     return wrapper;
 }
 
-// Lista com par Substituto + Substituído
 function criarListaPermuta(label, listId, subInputId, subdoInputId) {
     const wrapper = document.createElement('div');
     wrapper.style.marginBottom = '14px';
@@ -176,7 +192,6 @@ function criarListaPermuta(label, listId, subInputId, subdoInputId) {
     return wrapper;
 }
 
-// Lista para escolta emergência (Nome, Situação, Local)
 function criarListaEscolta(label, listId, nomeId, sitId, localId) {
     const wrapper = document.createElement('div');
     wrapper.style.marginBottom = '14px';
@@ -229,7 +244,6 @@ function criarListaEscolta(label, listId, nomeId, sitId, localId) {
     return wrapper;
 }
 
-// Lista para ocorrência (Nome, RG/CPF) - sem nome da mãe
 function criarListaOcorrencia(label, listId, nomeId, rgId) {
     const wrapper = document.createElement('div');
     wrapper.style.marginBottom = '14px';
@@ -275,7 +289,6 @@ function criarListaOcorrencia(label, listId, nomeId, rgId) {
     return wrapper;
 }
 
-// Funções para adicionar itens
 function addNameToList(listId, inputId) {
     const list = document.getElementById(listId);
     const input = document.getElementById(inputId);
@@ -353,8 +366,6 @@ function getPairs(listId) {
     return Array.from(list.querySelectorAll('.pair-item'))
         .map(el => el.textContent.replace('✕', '').trim()).join('; ');
 }
-
-// ========= CRIAÇÃO DOS MÓDULOS =========
 
 function criarMod1() {
     const div = document.createElement('div');
@@ -435,7 +446,6 @@ function criarMod4() {
     return div;
 }
 
-// ========= MÓDULO 5 - OCORRÊNCIA (COM BOTÕES DO META AI) =========
 function criarMod5() {
     const div = document.createElement('div');
     div.className = 'section-card';
@@ -450,7 +460,6 @@ function criarMod5() {
     div.appendChild(criarListaOcorrencia('CONDUZIDOS', 'm5_conduzidosList', 'm5_conduzidosNomeInput', 'm5_conduzidosRgInput'));
     div.appendChild(criarListaOcorrencia('VITIMAS', 'm5_vitimasList', 'm5_vitimasNomeInput', 'm5_vitimasRgInput'));
 
-    // Campo de Resumo Personalizado com botões do Meta AI
     const resumoWrapper = document.createElement('div');
     resumoWrapper.className = 'field-group';
     resumoWrapper.innerHTML = `
@@ -615,24 +624,16 @@ function criarMod14() {
     return div;
 }
 
-// ========= FUNÇÕES DO META AI (MÓDULO 5) =========
-
 function copiarResumoParaMetaAI() {
     const resumoInput = document.getElementById('m5_resumo');
     if (!resumoInput || resumoInput.value.trim() === '') {
         alert('Por favor, escreva algo no resumo antes de pedir ajuda ao Meta AI.');
         return;
     }
-
     const textoOriginal = resumoInput.value.trim();
-    
     navigator.clipboard.writeText(textoOriginal).then(() => {
-        // Monta a mensagem com o texto original já pronto para o Meta AI
         const mensagem = `Melhore este trecho de relatório policial mantendo as informações técnicas:\n\n${textoOriginal}`;
-        
         alert('Texto copiado! Agora cole no Meta AI do WhatsApp e peça para melhorar.');
-        
-        // Abre o app do WhatsApp usando o mesmo padrão do botão ENVIAR ESTE MÓDULO
         window.open('https://wa.me/?text=' + encodeURIComponent(mensagem), '_blank');
     }).catch(() => {
         alert('Não foi possível copiar automaticamente. Selecione o texto manualmente.');
@@ -642,9 +643,7 @@ function copiarResumoParaMetaAI() {
 function substituirResumoMelhorado() {
     const resumoInput = document.getElementById('m5_resumo');
     if (!resumoInput) return;
-
     const textoMelhorado = prompt('Cole aqui o texto melhorado que o Meta AI gerou:');
-    
     if (textoMelhorado && textoMelhorado.trim() !== '') {
         resumoInput.value = textoMelhorado.trim().toUpperCase();
         alert('Resumo substituído com sucesso!');
@@ -653,7 +652,6 @@ function substituirResumoMelhorado() {
     }
 }
 
-// ========= ENVIAR MÓDULO =========
 function enviarModulo(modId) {
     let relatorio = `*POLICIA MILITAR DA BAHIA*\n*CPR-LESTE*\n*Região Maria Quitéria*\n*UOPM: CIPGd-FEIRA DE SANTANA*\n\n`;
     const modulo = modulos.find(m => m.id === modId);
@@ -895,13 +893,11 @@ function enviarModulo(modId) {
     }
 }
 
-// ========= VOLTAR =========
 function voltarInicio() {
     document.getElementById('telaInicial').classList.remove('hidden');
     document.getElementById('telaFormulario').classList.add('hidden');
 }
 
-// ========= DETECTAR INSTALAÇÃO =========
 if (window.navigator.standalone) {
     document.getElementById('installBanner').style.display = 'none';
 } else {
